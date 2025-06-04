@@ -87,31 +87,29 @@ class Monster:
         self.setHp(dmg)
 
     def getHornedMaulHit(self):
-        dmg = getHornedHit(maulMax)
+        dmg = getHornedDamage(maulMax)
         defense = ceil(self.defense * 0.65)
         self.setDefense(defense)
         self.setHp(dmg)
 
     def getScytheUltor(self):
-        #dmg = getScytheHit(scytheMax, scytheAttackRoll, self.defense, self.slashDefense)
-        dmg = getScytheHit(scytheOathMax, scytheOathAttackRoll, self.defense, self.slashDefense)
+        dmg = getScytheDamage(scytheOathMax, scytheOathAttackRoll, self.defense, self.slashDefense)
         self.setHp(dmg)
 
     def getScytheLb(self):
-        #dmg = getScytheHit(scytheMaxLb, scytheAttackRoll, self.defense, self.slashDefense)
-        dmg = getScytheHit(scytheOathMaxLb, scytheOathAttackRoll, self.defense, self.slashDefense)
+        dmg = getScytheDamage(scytheOathMaxLb, scytheOathAttackRoll, self.defense, self.slashDefense)
         self.setHp(dmg)
 
     def getScytheSalve(self):
-        dmg = getScytheHit(scytheMaxSalve, scytheSalveAttackRoll, self.defense, self.slashDefense)
+        dmg = getScytheDamage(scytheMaxSalve, scytheSalveAttackRoll, self.defense, self.slashDefense)
         self.setHp(dmg)
 
     def getScythePneck(self):
-        dmg = getScytheHit(scytheMaxPneck, scythePneckAttackRoll, self.defense, self.slashDefense)
+        dmg = getScytheDamage(scytheMaxPneck, scythePneckAttackRoll, self.defense, self.slashDefense)
         self.setHp(dmg)
 
     def getClawSalve(self):
-        dmg = getClawDamage(clawSpecMaxSalve, clawSalveAttackRoll, self.defense, self.slashDefense)
+        dmg = getClawDamage(clawSpecMaxSalve, clawSalveAttackRoll, self.defense, self.slashDefense, False)
         self.setHp(dmg)
 
     def getZcb(self):
@@ -123,12 +121,12 @@ class Monster:
         self.setHp(dmg)
 
     def getClaw(self):
-        dmg = getClawDamage(clawSpecMax, clawAttackRoll, self.defense, self.slashDefense)
+        dmg = getClawDamage(clawSpecMax, clawAttackRoll, self.defense, self.slashDefense, False)
         self.setHp(dmg)
         return dmg
 
     def getHorendClaw(self):
-        dmg = getHornedClaw(clawSpecMax)
+        dmg = getClawDamage(clawSpecMax, clawAttackRoll, self.defense, self.slashDefense, True)
         self.setHp(dmg)
         return dmg
 
