@@ -1,0 +1,60 @@
+# Assume max gear, unless otherwise stated
+challyMaxHit = 67
+challySalveMaxHit = 75
+bgsMaxHit = 78
+bgsMaxHitSalve = 86
+clawSpecMax = 45
+clawSpecMaxSalve = 49
+scytheMax = 51
+scytheOathMax = 50  # oath top and legs with torva helm
+scytheMaxSalve = 56
+scytheMaxPneck = 48
+scytheMaxLb = 48  # max melee minus Ultor
+scytheOathMaxLb = 47  # oath top and legs with torva helm minus Ultor
+maulMax = 67
+
+tbowMaxVoid = 79  # quiver but no anguish
+tbowMaxMasori = 77  # anguish, body, quiver
+tbowMaxTorva = 70  # 1 way tbow swap
+
+sangMaxVoid = 41
+sangMaxFourWay = 40
+sangMaxVirtus = 42
+sangMaxTorva = 37
+
+scytheAttackRoll = 35164  # ring doesn't matter
+scytheOathAttackRoll = 39336  # oath top and legs with Torva helm
+bgsAttackRoll = 36207 * 2
+clawAttackRoll = 25032
+
+scytheSalveAttackRoll = 36678
+scythePneckAttackRoll = 31439
+bgsSalveAttackRoll = 37895 * 2
+clawSalveAttackRoll = 24858
+
+challyAttackRoll = 32929
+challySalveAttackRoll = challyAttackRoll * 1.15
+tbowAttackRollVoid = 33415  # no anguish
+tbowAttackRollMasori = 37175  # anguish, body, quiver
+#tbowAttackRollTorva = 37175 # body + anguish + quiver
+tbowAttackRollTorva = 15904  # 1 way tbow swap
+sangAttackRollVoid = 20776
+sangAttackRollVirtus = 24436
+sangAttackRollTorva = 2533
+zcbAttackRoll = 31356 * 2
+zcbAttackRollSalve = 31356 * 2 * 1.15
+maulSpecAttackRoll = 37392 * 1.25
+
+# Cooldowns are weapons cooldowns - 1 since its 0-base
+scytheCoolDown = 4
+clawCoolDown = 3
+zcbCoolDown = 4
+challyCoolDown = 6
+thrallCoolDown = 3
+maulCoolDown = 5
+bgsCoolDown = 5
+clawSpecPercent = 50
+maulSpecPercent = 50
+bgsSpecPercent = 50
+challySpecPercent = 30
+zcbSpecPercent = 75
