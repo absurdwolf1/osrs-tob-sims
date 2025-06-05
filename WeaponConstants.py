@@ -38,15 +38,25 @@ tbowAttackRollVoid = 33415  # no anguish
 tbowAttackRollMasori = 37175  # anguish, body, quiver
 #tbowAttackRollTorva = 37175 # body + anguish + quiver
 tbowAttackRollTorva = 15904  # 1 way tbow swap
+
 sangAttackRollVoid = 20776
 sangAttackRollVirtus = 24436
 sangAttackRollTorva = 2533
+
+# full anc, occult, and torm
+# no cape or boots
+shadowAttackRoll = 65858
+shadowMax = 61
+
 zcbAttackRoll = 31356 * 2
 zcbAttackRollSalve = 31356 * 2 * 1.15
 maulSpecAttackRoll = 37392 * 1.25
 
-# Cooldowns are weapons cooldowns - 1 since its 0-base
+# Cool downs are weapons cool downs - 1 since its 0-base
 scytheCoolDown = 4
+shadowCoolDown = 4
+tbowCoolDown = 4
+sangCoolDown = 3
 clawCoolDown = 3
 zcbCoolDown = 4
 challyCoolDown = 6

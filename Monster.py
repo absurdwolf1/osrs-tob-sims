@@ -137,3 +137,11 @@ class Monster:
     def getVengDamage(self, maxHit):
         dmg = 0.75 * randrange(maxHit)
         self.setHp(dmg)
+
+    def doScytheAttack(self, maxHit, attackRoll):
+        dmg = getScytheDamage(maxHit, attackRoll, self.defense, self.slashDefense)
+        self.setHp(dmg)
+
+    def doAttack(self, maxHit, attackRoll, typeDefense):
+        dmg = getHit(maxHit, attackRoll, self.defense, typeDefense)
+        self.setHp(dmg)

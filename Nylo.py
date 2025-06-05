@@ -8,6 +8,9 @@ class Nylo(Monster):
         self.godBoss = False
         self.phase = "melee"
         self.phases = ["melee", "range", "mage"]
+        # keeps track of how many of each phase the boss turns to [melee, range, mage]
+        # it starts in melee phase
+        self.phaseTypeCounts = [1, 0, 0]
 
     def forceGodBoss(self):
         self.godBoss = True
@@ -15,16 +18,28 @@ class Nylo(Monster):
     def changePhase(self):
         if self.godBoss:
             if self.phase == "melee":
-                return "range"
+                self.setPhase("range")
+                return
             else:
-                return "melee"
+                self.setPhase("melee")
+                return
 
         roll = randrange(2)
 
         if self.phase == "melee":
-            self.phase = "range" if roll == 0 else self.phase = "mage"
+            self.setPhase("range") if roll == 0 else self.setPhase("mage")
         elif self.phase == "range":
-            self.phase = "melee" if roll == 0 else self.phase = "mage"
+            self.setPhase("melee") if roll == 0 else self.setPhase("mage")
         elif self.phase == "mage":
-            self.phase = "melee" if roll == 0 else self.phase = "range"
-        return self.phase
+            self.setPhase("melee") if roll == 0 else self.setPhase("range")
+
+    def setPhase(self, newPhase):
+        if newPhase == "melee":
+            self.phaseTypeCounts[0] += 1
+            self.phase = "melee"
+        elif newPhase == "range":
+            self.phaseTypeCounts[1] += 1
+            self.phase = "range"
+        elif newPhase == "mage":
+            self.phaseTypeCounts[2] += 1
+            self.phase = "mage"
