@@ -21,6 +21,14 @@ tbowVoid = GearSet(WeaponConstants.tbowMaxVoid,
                    WeaponConstants.tbowAttackRollVoid,
                    WeaponConstants.tbowCoolDown)
 
+maxRange = GearSet(WeaponConstants.tbowMaxVoidAng,
+                   WeaponConstants.tbowAttackRollVoid,
+                   WeaponConstants.tbowCoolDown)
+
+tbowMasoriAng = GearSet(WeaponConstants.tbowMaxMasoriAng,
+                        WeaponConstants.tbowAttackRollVoid,
+                        WeaponConstants.tbowCoolDown)
+
 tbowTorva = GearSet(WeaponConstants.tbowMaxTorva,
                     WeaponConstants.tbowAttackRollTorva,
                     WeaponConstants.tbowCoolDown)

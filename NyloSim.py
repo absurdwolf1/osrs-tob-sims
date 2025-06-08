@@ -5,11 +5,12 @@ from Nylo import Nylo
 import numpy as np
 import WeaponConstants
 
-TEAM_SIZE = 5
-BACKUP_THRESHOLD = 15
-BP_FILL_THRESHOLD = 0.3
+BACKUP_THRESHOLD = 20
+BP_FILL_THRESHOLD = 0.5
+
 trials = 10000
 
+TEAM_SIZE = 5
 if TEAM_SIZE == 5:
     NYLO_HP = 2500
 elif TEAM_SIZE == 4:
@@ -23,9 +24,8 @@ NYLO_CRUSH_DEF = 0
 NYLO_STANDARD_RANGE_DEF = 0
 NYLO_HEAVY_RANGE_DEF = 0
 DEATH_ANIMATION_TICKS = 4
-
 PHASE_LENGTH_TICKS = 10
-BOSS_DROP_TIME = 3
+BOSS_DROP_TIME_TICKS = 3
 
 
 def main():
@@ -54,6 +54,8 @@ def killNylo():
     while nylo.getHp() > 0:
         roomTimeTicks += 1
 
+        # the player can't attack the same tick the boss spawns
+        # force the players to attack on the 2nd tick to take this into account
         if roomTimeTicks == 1:
             continue
 
@@ -74,12 +76,17 @@ def killNylo():
                             and "chally" in player.specWeapons \
                             and player.spec >= WeaponConstants.challySpecPercent:
                         player.challySpec(nylo)
+                        # remove chally from the player's spec weapons so they don't chally again
                         player.specWeapons.remove("chally")
                     else:
                         player.meleeAttack(nylo)
                 elif nylo.phase == "range":
+                    # if the player has a zcb spec ready
                     if player.spec >= WeaponConstants.zcbSpecPercent and "zcb" in player.specWeapons:
                         player.zcbSpec(nylo)
+                    # check to see if the player can blowpipe fill
+                    # (attacking 6 or 7 ticks after the previous phase change)
+                    # and the nylo boss is above a certain hp threshold
                     elif nylo.hp > BP_FILL_THRESHOLD * NYLO_HP \
                             and (roomTimeTicks % PHASE_LENGTH_TICKS == 6
                                  or roomTimeTicks % PHASE_LENGTH_TICKS == 7):
@@ -91,16 +98,13 @@ def killNylo():
             else:
                 player.decreaseWeaponCoolDown()
 
-    return roomTimeTicks + DEATH_ANIMATION_TICKS + BOSS_DROP_TIME
+    return roomTimeTicks + DEATH_ANIMATION_TICKS + BOSS_DROP_TIME_TICKS
 
 
 def createPlayers():
     players = []
 
     # NORTH MAGE
-    # melee: oath scythe
-    # range: tbow masori
-    # mage: sang virtus
     player1 = Player()
     player1.setSpec(105, ["chally", "zcb"])
     player1.setMeleeGear(GearSets.scytheOath)
@@ -110,20 +114,14 @@ def createPlayers():
     players.append(player1)
 
     # MAGE DPS
-    # melee: oath scythe
-    # range: tbow torva
-    # mage: sang virtus
     player2 = Player()
     player2.setSpec(105, ["chally", "zcb"])
     player2.setMeleeGear(GearSets.scytheOath)
-    player2.setRangeGear(GearSets.tbowTorva)
+    player2.setRangeGear(GearSets.tbowMasori)
     player2.setMageGear(GearSets.sangVirtus)
     players.append(player2)
 
     # RANGE
-    # melee: oath scythe
-    # range: tbow void
-    # mage: sang torva
     player3 = Player()
     player3.setSpec(105, ["chally", "zcb"])
     player3.setMeleeGear(GearSets.scytheOath)
@@ -132,9 +130,6 @@ def createPlayers():
     players.append(player3)
 
     # MELEE 1
-    # melee: oath scythe
-    # range: tbow torva
-    # mage: sang torva
     player4 = Player()
     player4.setSpec(105, ["chally", "zcb"])
     player4.setMeleeGear(GearSets.scytheOath)
@@ -143,9 +138,6 @@ def createPlayers():
     players.append(player4)
 
     # MELEE 2
-    # melee: oath scythe
-    # range: tbow torva
-    # mage: sang torva
     player5 = Player()
     player5.setSpec(125, ["bgs", "zcb"])
     player5.setMeleeGear(GearSets.scytheOath)

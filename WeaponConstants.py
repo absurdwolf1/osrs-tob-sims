@@ -13,8 +13,10 @@ scytheMaxLb = 48  # max melee minus Ultor
 scytheOathMaxLb = 47  # oath top and legs with torva helm minus Ultor
 maulMax = 67
 
-tbowMaxVoid = 79  # quiver but no anguish
+tbowMaxVoidAng = 83  # max range
+tbowMaxVoid = 81  # quiver but no anguish
 tbowMaxMasori = 77  # anguish, body, quiver
+tbowMaxMasoriAng = 75  # masori body and anguish
 tbowMaxTorva = 70  # 1 way tbow swap
 
 blowpipeMaxVoid = 33
