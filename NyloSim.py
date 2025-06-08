@@ -6,17 +6,9 @@ import numpy as np
 import WeaponConstants
 
 BACKUP_THRESHOLD = 20
-BP_FILL_THRESHOLD = 0.5
+BP_FILL_THRESHOLD = 0.7
 
 trials = 10000
-
-TEAM_SIZE = 5
-if TEAM_SIZE == 5:
-    NYLO_HP = 2500
-elif TEAM_SIZE == 4:
-    NYLO_HP = 2187
-else:
-    NYLO_HP = 1875
 
 NYLO_DEF = 50
 NYLO_SLASH_DEF = 0
@@ -39,10 +31,17 @@ def main():
 
 
 def killNylo():
+    players = createPlayers()
+    TEAM_SIZE = len(players)
+    if TEAM_SIZE == 5:
+        NYLO_HP = 2500
+    elif TEAM_SIZE == 4:
+        NYLO_HP = 2187
+    else:
+        NYLO_HP = 1875
+
     nylo = Nylo(NYLO_HP, NYLO_DEF, NYLO_SLASH_DEF, NYLO_CRUSH_DEF, NYLO_STANDARD_RANGE_DEF, NYLO_HEAVY_RANGE_DEF)
     #nylo.forceGodBoss()
-
-    players = createPlayers()
 
     # find the player with the bgs
     bgsPlayer = players[TEAM_SIZE - 1]
@@ -50,18 +49,20 @@ def killNylo():
         if "bgs" in player.specWeapons:
             bgsPlayer = player
 
-    roomTimeTicks = 0
+        # the player can't attack the same tick the boss spawns
+        # start the room at tick 1 to take this into account
+    roomTimeTicks = 1
     while nylo.getHp() > 0:
         roomTimeTicks += 1
-
-        # the player can't attack the same tick the boss spawns
-        # force the players to attack on the 2nd tick to take this into account
-        if roomTimeTicks == 1:
-            continue
 
         # change the phase every 10 ticks
         if roomTimeTicks % PHASE_LENGTH_TICKS == 0:
             nylo.changePhase()
+            # a player cannot attack the same tick the boss changes phases
+            # decrement all the cool downs by 1 then continue
+            for player in players:
+                player.decreaseWeaponCoolDown()
+            continue
 
         for player in players:
             if player.weaponCoolDown == 0:

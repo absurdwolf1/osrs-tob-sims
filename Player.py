@@ -88,4 +88,4 @@ class Player:
         self.weaponCoolDown = WeaponConstants.blowpipeCoolDown
 
     def decreaseWeaponCoolDown(self):
-        self.weaponCoolDown -= 1
+        self.weaponCoolDown = max(0, self.weaponCoolDown - 1)
