@@ -24,20 +24,20 @@ class Player:
         self.specWeapons = specWeapons
         self.spec = spec
 
-    def setMeleeGear(self, maxHit, attackRoll, coolDown):
-        self.meleeMaxHit = maxHit
-        self.meleeAttackRoll = attackRoll
-        self.meleeCoolDown = coolDown
+    def setMeleeGear(self, gearSet):
+        self.meleeMaxHit = gearSet.maxHit
+        self.meleeAttackRoll = gearSet.attackRoll
+        self.meleeCoolDown = gearSet.coolDown
 
-    def setRangeGear(self, maxHit, attackRoll, coolDown):
-        self.rangeMaxHit = maxHit
-        self.rangeAttackRoll = attackRoll
-        self.rangeCoolDown = coolDown
+    def setRangeGear(self, gearSet):
+        self.rangeMaxHit = gearSet.maxHit
+        self.rangeAttackRoll = gearSet.attackRoll
+        self.rangeCoolDown = gearSet.coolDown
 
-    def setMageGear(self, maxHit, attackRoll, coolDown):
-        self.mageMaxHit = maxHit
-        self.mageAttackRoll = attackRoll
-        self.mageCoolDown = coolDown
+    def setMageGear(self, gearSet):
+        self.mageMaxHit = gearSet.maxHit
+        self.mageAttackRoll = gearSet.attackRoll
+        self.mageCoolDown = gearSet.coolDown
 
     def meleeAttack(self, monster):
         monster.doScytheAttack(self.meleeMaxHit, self.meleeAttackRoll)
@@ -51,10 +51,41 @@ class Player:
         monster.doAttack(self.mageMaxHit, self.mageAttackRoll, 0)  # TODO add mage defense
         self.weaponCoolDown = self.mageCoolDown
 
+    def maulSpec(self, monster, horned):
+        monster.getMaulHit()
+        self.weaponCoolDown = WeaponConstants.maulCoolDown
+        self.spec -= WeaponConstants.maulCoolDown
+
+    def bgsSpec(self, monster):
+        monster.getBgs()
+        self.weaponCoolDown = WeaponConstants.bgsCoolDown
+        self.spec -= WeaponConstants.bgsSpecPercent
+
+    def challySpec(self, monster):
+        monster.getChally()
+        self.weaponCoolDown = WeaponConstants.challyCoolDown
+        self.spec -= WeaponConstants.challySpecPercent
+
     def zcbSpec(self, monster):
         monster.getZcb()
         self.weaponCoolDown = WeaponConstants.zcbCoolDown
         self.spec -= WeaponConstants.zcbSpecPercent
+
+    def blowpipe(self, monster):
+        # TODO bp rolls against light range def
+        # figure out what range gear the player is using
+        if self.rangeMaxHit == WeaponConstants.tbowMaxVoid:
+            bpMax = WeaponConstants.blowpipeMaxVoid
+        elif self.rangeMaxHit == WeaponConstants.tbowMaxMasori:
+            bpMax = WeaponConstants.blowpipeMaxMasori
+        else:
+            bpMax = WeaponConstants.blowpipeMaxTorva
+
+        monster.doAttack(bpMax,
+                         WeaponConstants.blowpipeAttackRoll,
+                         monster.standardRangeDefense)
+
+        self.weaponCoolDown = WeaponConstants.blowpipeCoolDown
 
     def decreaseWeaponCoolDown(self):
         self.weaponCoolDown -= 1

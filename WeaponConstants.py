@@ -17,6 +17,12 @@ tbowMaxVoid = 79  # quiver but no anguish
 tbowMaxMasori = 77  # anguish, body, quiver
 tbowMaxTorva = 70  # 1 way tbow swap
 
+blowpipeMaxVoid = 33
+blowpipeMaxMasori = 30
+blowpipeMaxTorva = 27
+blowpipeAttackRoll = 21372
+blowpipeCoolDown = 1
+
 sangMaxVoid = 41
 sangMaxFourWay = 40
 sangMaxVirtus = 42

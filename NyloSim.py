@@ -1,23 +1,28 @@
+import GearSets
 from Player import Player
 from PrintTobStats import *
 from Nylo import Nylo
 import numpy as np
 import WeaponConstants
 
-NYLO_HP = 2500
+TEAM_SIZE = 5
+BACKUP_THRESHOLD = 15
+BP_FILL_THRESHOLD = 0.3
+trials = 10000
+
+if TEAM_SIZE == 5:
+    NYLO_HP = 2500
+elif TEAM_SIZE == 4:
+    NYLO_HP = 2187
+else:
+    NYLO_HP = 1875
+
 NYLO_DEF = 50
 NYLO_SLASH_DEF = 0
 NYLO_CRUSH_DEF = 0
 NYLO_STANDARD_RANGE_DEF = 0
 NYLO_HEAVY_RANGE_DEF = 0
-TEAM_SIZE = 5
 DEATH_ANIMATION_TICKS = 4
-
-bgs = True
-bgsHit = -1
-BACKUP_THRESHOLD = 15
-
-trials = 10000
 
 PHASE_LENGTH_TICKS = 10
 BOSS_DROP_TIME = 3
@@ -30,55 +35,55 @@ def main():
 
     times = sorted(times)
     printStats(times)
-
     plotTimes(times, "Nylo Boss", 6)
 
 
 def killNylo():
     nylo = Nylo(NYLO_HP, NYLO_DEF, NYLO_SLASH_DEF, NYLO_CRUSH_DEF, NYLO_STANDARD_RANGE_DEF, NYLO_HEAVY_RANGE_DEF)
-    nylo.forceGodBoss()
+    #nylo.forceGodBoss()
 
     players = createPlayers()
 
-    # hard-code 1st phase to deal with scythe -> chally and bgs specs
-    # everyone does 1 scythe into a chally spec, the bgs player does a bgs and either backs up or scythes
-    for player in range(TEAM_SIZE - 1):
-        players[player].meleeAttack(nylo)
-
-    # TODO better way to do this
+    # find the player with the bgs
     bgsPlayer = players[TEAM_SIZE - 1]
-    nylo.getBgs()
-    bgsPlayer.setSpec(75, bgsPlayer.specWeapons)
+    for player in players:
+        if "bgs" in player.specWeapons:
+            bgsPlayer = player
 
-    for player in range(TEAM_SIZE - 1):
-        nylo.getChally()
-
-    backup = nylo.getDefense() > BACKUP_THRESHOLD
-    if backup:
-        nylo.getBgs()
-        bgsPlayer.setSpec(0, bgsPlayer.specWeapons)
-        bgsPlayer.weaponCoolDown = 4
-    else:
-        bgsPlayer.meleeAttack(nylo)
-        bgsPlayer.weaponCoolDown = 3
-
-    # 1st phase is 10 ticks long, plus 3 ticks it takes for the boss to drop from the ceiling
-    roomTimeTicks = 13
-
+    roomTimeTicks = 0
     while nylo.getHp() > 0:
-        # change the phase every 10 ticks
-        if (roomTimeTicks - BOSS_DROP_TIME) % PHASE_LENGTH_TICKS == 0:
-            nylo.changePhase()
-
         roomTimeTicks += 1
+
+        if roomTimeTicks == 1:
+            continue
+
+        # change the phase every 10 ticks
+        if roomTimeTicks % PHASE_LENGTH_TICKS == 0:
+            nylo.changePhase()
 
         for player in players:
             if player.weaponCoolDown == 0:
                 if nylo.phase == "melee":
-                    player.meleeAttack(nylo)
+                    # bgs the boss if the bgs player has enough spec and is above the backup threshold
+                    if "bgs" in player.specWeapons \
+                            and player.spec >= WeaponConstants.bgsSpecPercent \
+                            and nylo.defense > BACKUP_THRESHOLD:
+                        player.bgsSpec(nylo)
+                    # chally the boss if the bgs player has already bgs'd once
+                    elif bgsPlayer.spec < 100 \
+                            and "chally" in player.specWeapons \
+                            and player.spec >= WeaponConstants.challySpecPercent:
+                        player.challySpec(nylo)
+                        player.specWeapons.remove("chally")
+                    else:
+                        player.meleeAttack(nylo)
                 elif nylo.phase == "range":
                     if player.spec >= WeaponConstants.zcbSpecPercent and "zcb" in player.specWeapons:
                         player.zcbSpec(nylo)
+                    elif nylo.hp > BP_FILL_THRESHOLD * NYLO_HP \
+                            and (roomTimeTicks % PHASE_LENGTH_TICKS == 6
+                                 or roomTimeTicks % PHASE_LENGTH_TICKS == 7):
+                        player.blowpipe(nylo)
                     else:
                         player.rangeAttack(nylo)
                 elif nylo.phase == "mage":
@@ -86,11 +91,9 @@ def killNylo():
             else:
                 player.decreaseWeaponCoolDown()
 
-    return roomTimeTicks + DEATH_ANIMATION_TICKS
+    return roomTimeTicks + DEATH_ANIMATION_TICKS + BOSS_DROP_TIME
 
 
-# TODO better way to create this
-# maybe have "set" classes aka oath, void, virtus, etc
 def createPlayers():
     players = []
 
@@ -99,19 +102,11 @@ def createPlayers():
     # range: tbow masori
     # mage: sang virtus
     player1 = Player()
-    player1.setSpec(75, "zcb")
-    player1.setMeleeGear(WeaponConstants.scytheOathMax,
-                         WeaponConstants.scytheOathAttackRoll,
-                         WeaponConstants.scytheCoolDown)
-    player1.setRangeGear(WeaponConstants.tbowMaxMasori,
-                         WeaponConstants.tbowAttackRollMasori,
-                         WeaponConstants.tbowCoolDown)
-    player1.setMageGear(WeaponConstants.sangMaxVirtus,
-                        WeaponConstants.sangAttackRollVirtus,
-                        WeaponConstants.sangCoolDown)
-    # player1.setMageGear(WeaponConstants.shadowMax,
-    #                     WeaponConstants.shadowAttackRoll,
-    #                     WeaponConstants.shadowCoolDown)
+    player1.setSpec(105, ["chally", "zcb"])
+    player1.setMeleeGear(GearSets.scytheOath)
+    player1.setRangeGear(GearSets.tbowMasori)
+    # player1.setMageGear(GearSets.shadowAnc)
+    player1.setMageGear(GearSets.sangVirtus)
     players.append(player1)
 
     # MAGE DPS
@@ -119,16 +114,10 @@ def createPlayers():
     # range: tbow torva
     # mage: sang virtus
     player2 = Player()
-    player2.setSpec(75, "zcb")
-    player2.setMeleeGear(WeaponConstants.scytheOathMax,
-                         WeaponConstants.scytheOathAttackRoll,
-                         WeaponConstants.scytheCoolDown)
-    player2.setRangeGear(WeaponConstants.tbowMaxTorva,
-                         WeaponConstants.tbowAttackRollTorva,
-                         WeaponConstants.tbowCoolDown)
-    player2.setMageGear(WeaponConstants.sangMaxVirtus,
-                        WeaponConstants.sangAttackRollVirtus,
-                        WeaponConstants.sangCoolDown)
+    player2.setSpec(105, ["chally", "zcb"])
+    player2.setMeleeGear(GearSets.scytheOath)
+    player2.setRangeGear(GearSets.tbowTorva)
+    player2.setMageGear(GearSets.sangVirtus)
     players.append(player2)
 
     # RANGE
@@ -136,16 +125,10 @@ def createPlayers():
     # range: tbow void
     # mage: sang torva
     player3 = Player()
-    player3.setSpec(75, "zcb")
-    player3.setMeleeGear(WeaponConstants.scytheOathMax,
-                         WeaponConstants.scytheOathAttackRoll,
-                         WeaponConstants.scytheCoolDown)
-    player3.setRangeGear(WeaponConstants.tbowMaxVoid,
-                         WeaponConstants.tbowAttackRollVoid,
-                         WeaponConstants.tbowCoolDown)
-    player3.setMageGear(WeaponConstants.sangMaxTorva,
-                        WeaponConstants.sangAttackRollTorva,
-                        WeaponConstants.sangCoolDown)
+    player3.setSpec(105, ["chally", "zcb"])
+    player3.setMeleeGear(GearSets.scytheOath)
+    player3.setRangeGear(GearSets.tbowVoid)
+    player3.setMageGear(GearSets.sangTorva)
     players.append(player3)
 
     # MELEE 1
@@ -153,16 +136,10 @@ def createPlayers():
     # range: tbow torva
     # mage: sang torva
     player4 = Player()
-    player4.setSpec(75, "zcb")
-    player4.setMeleeGear(WeaponConstants.scytheOathMax,
-                         WeaponConstants.scytheOathAttackRoll,
-                         WeaponConstants.scytheCoolDown)
-    player4.setRangeGear(WeaponConstants.tbowMaxTorva,
-                         WeaponConstants.tbowAttackRollTorva,
-                         WeaponConstants.tbowCoolDown)
-    player4.setMageGear(WeaponConstants.sangMaxTorva,
-                        WeaponConstants.sangAttackRollTorva,
-                        WeaponConstants.sangCoolDown)
+    player4.setSpec(105, ["chally", "zcb"])
+    player4.setMeleeGear(GearSets.scytheOath)
+    player4.setRangeGear(GearSets.tbowTorva)
+    player4.setMageGear(GearSets.sangTorva)
     players.append(player4)
 
     # MELEE 2
@@ -170,16 +147,10 @@ def createPlayers():
     # range: tbow torva
     # mage: sang torva
     player5 = Player()
-    player5.setSpec(125, "zcb")
-    player5.setMeleeGear(WeaponConstants.scytheOathMax,
-                         WeaponConstants.scytheOathAttackRoll,
-                         WeaponConstants.scytheCoolDown)
-    player5.setRangeGear(WeaponConstants.tbowMaxTorva,
-                         WeaponConstants.tbowAttackRollTorva,
-                         WeaponConstants.tbowCoolDown)
-    player5.setMageGear(WeaponConstants.sangMaxTorva,
-                        WeaponConstants.sangAttackRollTorva,
-                        WeaponConstants.sangCoolDown)
+    player5.setSpec(125, ["bgs", "zcb"])
+    player5.setMeleeGear(GearSets.scytheOath)
+    player5.setRangeGear(GearSets.tbowTorva)
+    player5.setMageGear(GearSets.sangTorva)
     players.append(player5)
 
     return players
