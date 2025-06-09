@@ -61,7 +61,7 @@ class Monster:
         self.setHp(dmg)
 
     def getChally(self):
-        dmg = getHit(challyMaxHit, challyAttackRoll, self.defense, self.slashDefense)
+        dmg = getChallyDamage(challyMaxHit, challyAttackRoll, self.defense, self.slashDefense)
         self.setHp(dmg)
 
     def getChallySalve(self):

@@ -1,9 +1,9 @@
 # Assume max gear, unless otherwise stated
-challyMaxHit = 67
-challySalveMaxHit = 75
-bgsMaxHit = 78
-bgsMaxHitSalve = 86
-clawSpecMax = 45
+challyMaxHit = 65
+challySalveMaxHit = 74
+bgsMaxHit = 77
+bgsMaxHitSalve = 85
+clawSpecMax = 44
 clawSpecMaxSalve = 49
 scytheMax = 51
 scytheOathMax = 50  # oath top and legs with torva helm
@@ -11,7 +11,7 @@ scytheMaxSalve = 56
 scytheMaxPneck = 48
 scytheMaxLb = 48  # max melee minus Ultor
 scytheOathMaxLb = 47  # oath top and legs with torva helm minus Ultor
-maulMax = 67
+maulMax = 66
 
 tbowMaxVoidAng = 83  # max range
 tbowMaxVoid = 81  # quiver but no anguish

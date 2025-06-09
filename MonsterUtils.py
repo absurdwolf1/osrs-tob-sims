@@ -57,6 +57,14 @@ def getDamage(maxHit, accuracy):
         return 0
 
 
+def getChallyDamage(maxHit, attRoll, defense, slashDefense):
+    accuracy = getAccuracy(attRoll, getDefRoll(defense, slashDefense))
+    secondHitAccuracy = max(0, accuracy - 25)
+    dmg = getDamage(maxHit, accuracy)
+    dmg += getDamage(maxHit, secondHitAccuracy)
+    return dmg
+
+
 def getZcbDamage(attRoll, defense, heavyRangedDefense):
     accuracy = getAccuracy(attRoll, getDefRoll(defense, heavyRangedDefense))
     return 110 if accuracyCheck(accuracy) else 0
