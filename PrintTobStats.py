@@ -52,3 +52,14 @@ def ticksToTime(tick):
         return str(minutes) + ":0" + str(seconds)
     else:
         return str(minutes) + ":" + str(seconds)
+
+
+def printStatsWithPrefix(times, prefix):
+    averageTimeSeconds = round(np.average(times) * 0.6, 2)
+    modeSeconds = mode(times) * 0.6
+    stdSeconds = round(stdev(times) * 0.6, 2)
+    fastestTimeSeconds = round(min(times) * 0.6, 2)
+    print(prefix + " Average Kill Time (seconds): " + str(averageTimeSeconds))
+    print(prefix + " Mode (seconds): " + str(modeSeconds))
+    print(prefix + " Std Dev (seconds): " + str(stdSeconds))
+    print(prefix + " Fastest Time (seconds) " + str(fastestTimeSeconds))

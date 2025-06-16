@@ -13,6 +13,14 @@ scytheOath = GearSet(WeaponConstants.scytheOathMax,
                      WeaponConstants.scytheOathAttackRoll,
                      WeaponConstants.scytheCoolDown)
 
+scytheOathSalve = GearSet(WeaponConstants.scytheMaxSalve,
+                          WeaponConstants.scytheSalveAttackRoll,
+                          WeaponConstants.scytheCoolDown)
+
+scytheOathPneck = GearSet(WeaponConstants.scytheMaxPneck,
+                          WeaponConstants.scythePneckAttackRoll,
+                          WeaponConstants.scytheCoolDown)
+
 tbowMasori = GearSet(WeaponConstants.tbowMaxMasori,
                      WeaponConstants.tbowAttackRollMasori,
                      WeaponConstants.tbowCoolDown)

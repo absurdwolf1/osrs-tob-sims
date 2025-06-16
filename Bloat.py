@@ -3,7 +3,7 @@ from Monster import Monster
 from random import randrange
 
 MIN_DOWN_TICKS = 39
-MAX_DOWN_TICKS = 53
+MAX_DOWN_TICKS = 44
 
 
 class Bloat(Monster):
@@ -24,3 +24,6 @@ class Bloat(Monster):
 
     def getWalkTIme(self):
         return self.walkTime
+
+    def setWalkTime(self, walkTIme):
+        self.walkTime = walkTIme

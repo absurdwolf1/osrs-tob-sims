@@ -5,9 +5,6 @@ from Nylo import Nylo
 import numpy as np
 import WeaponConstants
 
-BACKUP_THRESHOLD = 20
-BP_FILL_THRESHOLD = 0.7
-
 trials = 10000
 
 NYLO_DEF = 50
@@ -22,16 +19,18 @@ BOSS_DROP_TIME_TICKS = 3
 
 def main():
     times = np.empty(trials)
+    backThreshold = 20
+    bpFillThreshold = 0.7
     for x in range(trials):
-        times[x] = killNylo()
+        players = createPlayers()
+        times[x] = killNylo(players, backThreshold, bpFillThreshold)
 
     times = sorted(times)
     printStats(times)
     plotTimes(times, "Nylo Boss", 6)
 
 
-def killNylo():
-    players = createPlayers()
+def killNylo(players, backThreshold, bpFillThreshold):
     TEAM_SIZE = len(players)
     if TEAM_SIZE == 5:
         NYLO_HP = 2500
@@ -70,7 +69,7 @@ def killNylo():
                     # bgs the boss if the bgs player has enough spec and is above the backup threshold
                     if "bgs" in player.specWeapons \
                             and player.spec >= WeaponConstants.bgsSpecPercent \
-                            and nylo.defense > BACKUP_THRESHOLD:
+                            and nylo.defense > backThreshold:
                         player.bgsSpec(nylo)
                     # chally the boss if the bgs player has already bgs'd once
                     elif bgsPlayer.spec < 100 \
@@ -88,7 +87,7 @@ def killNylo():
                     # check to see if the player can blowpipe fill
                     # (attacking 6 or 7 ticks after the previous phase change)
                     # and the nylo boss is above a certain hp threshold
-                    elif nylo.hp > BP_FILL_THRESHOLD * NYLO_HP \
+                    elif nylo.hp > bpFillThreshold * NYLO_HP \
                             and (roomTimeTicks % PHASE_LENGTH_TICKS == 6
                                  or roomTimeTicks % PHASE_LENGTH_TICKS == 7):
                         player.blowpipe(nylo)

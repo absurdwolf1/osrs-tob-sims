@@ -2,13 +2,13 @@
 challyMaxHit = 65
 challySalveMaxHit = 74
 bgsMaxHit = 77
-bgsMaxHitSalve = 85
+bgsMaxHitSalve = 88
 clawSpecMax = 44
 clawSpecMaxSalve = 49
 scytheMax = 51
 scytheOathMax = 50  # oath top and legs with torva helm
 scytheMaxSalve = 56
-scytheMaxPneck = 48
+scytheMaxPneck = 47
 scytheMaxLb = 48  # max melee minus Ultor
 scytheOathMaxLb = 47  # oath top and legs with torva helm minus Ultor
 maulMax = 66
@@ -35,13 +35,13 @@ scytheOathAttackRoll = 39336  # oath top and legs with Torva helm
 bgsAttackRoll = 36207 * 2
 clawAttackRoll = 25032
 
-scytheSalveAttackRoll = 36678
-scythePneckAttackRoll = 31439
-bgsSalveAttackRoll = 37895 * 2
-clawSalveAttackRoll = 24858
+scytheSalveAttackRoll = 42723
+scythePneckAttackRoll = 35611
+bgsSalveAttackRoll = 43984 * 2
+clawSalveAttackRoll = 30574
 
-challyAttackRoll = 32929
-challySalveAttackRoll = challyAttackRoll * 1.15
+challyAttackRoll = 37101
+challySalveAttackRoll = 40051
 tbowAttackRollVoid = 33415  # no anguish
 tbowAttackRollMasori = 37175  # anguish, body, quiver
 #tbowAttackRollTorva = 37175 # body + anguish + quiver
@@ -57,7 +57,7 @@ shadowAttackRoll = 65858
 shadowMax = 61
 
 zcbAttackRoll = 31356 * 2
-zcbAttackRollSalve = 31356 * 2 * 1.15
+zcbAttackRollSalve = 35613 * 2
 maulSpecAttackRoll = 37392 * 1.25
 
 # Cool downs are weapons cool downs - 1 since its 0-base

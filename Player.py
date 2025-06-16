@@ -61,13 +61,38 @@ class Player:
         self.weaponCoolDown = WeaponConstants.bgsCoolDown
         self.spec -= WeaponConstants.bgsSpecPercent
 
+    def bgsSpecSalve(self, monster):
+        monster.getBgsSalve()
+        self.weaponCoolDown = WeaponConstants.bgsCoolDown
+        self.spec -= WeaponConstants.bgsSpecPercent
+
+    def clawSpec(self, monster):
+        monster.getClaw()
+        self.weaponCoolDown = WeaponConstants.clawCoolDown
+        self.spec -= WeaponConstants.clawSpecPercent
+
+    def clawSpecSalve(self, monster):
+        monster.getClawSalve()
+        self.weaponCoolDown = WeaponConstants.clawCoolDown
+        self.spec -= WeaponConstants.clawSpecPercent
+
     def challySpec(self, monster):
         monster.getChally()
         self.weaponCoolDown = WeaponConstants.challyCoolDown
         self.spec -= WeaponConstants.challySpecPercent
 
+    def challySpecSalve(self, monster):
+        monster.getChallySalve()
+        self.weaponCoolDown = WeaponConstants.challyCoolDown
+        self.spec -= WeaponConstants.challySpecPercent
+
     def zcbSpec(self, monster):
         monster.getZcb()
+        self.weaponCoolDown = WeaponConstants.zcbCoolDown
+        self.spec -= WeaponConstants.zcbSpecPercent
+
+    def zcbSpecSalve(self, monster):
+        monster.getZcbSalve()
         self.weaponCoolDown = WeaponConstants.zcbCoolDown
         self.spec -= WeaponConstants.zcbSpecPercent
 

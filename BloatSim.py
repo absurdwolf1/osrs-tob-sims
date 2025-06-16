@@ -1,23 +1,17 @@
-from random import randrange
-from math import floor
-from statistics import mode
-from statistics import stdev
+import WeaponConstants
 from Bloat import Bloat
-from WeaponConstants import *
+import GearSets
+from Player import Player
+from PrintTobStats import *
 
 
-MIN_DOWN_TICKS = 39
-MAX_DOWN_TICKS = 53
-BACKUP_THRESHOLD = 35
-HUMID_CYCLE_START_TICK = 16
-NON_HUMID_CYCLE_START_TICK = 27
+BACKUP_THRESHOLD = 25
 BLOAT_SLEEP_TICKS = 32
 TEAM_SIZE = 5
-DEATH_ANIMATION_SECONDS = 1.8
+DEATH_ANIMATION_TICKS = 3
+CHALLY_THRESHOLD_PERCENT = 0.10
 
 trials = 10000
-
-SBS_FRZ = True
 
 BLOAT_HP_5_MAN = 2000
 BLOAT_DEFENSE = 100
@@ -28,178 +22,137 @@ BLOAT_HEAVY_RANGE_DEFENSE = 800
 
 
 def main():
-    totalTime = 0
-    walkTime = 0
-    failedBloatCount = 0
-    sub40Count = 0
-    fastestTime = 1000000000
     times = []
     for x in range(trials):
-        timeToKill, walkTime = killBloat()
-        if timeToKill < 0:
-            failedBloatCount += 1
-        else:
-            if timeToKill < 41:
-                sub40Count += 1
-            totalTime += timeToKill
-            times.append(timeToKill)
-            if fastestTime > timeToKill:
-                fastestTime = timeToKill
+        players = createPlayers()
+        time = killBloat(players, -1, -1)
+        if time > 0:
+            times.append(time)
 
-    if totalTime > 0:
-
-        averageTimeSeconds = totalTime / len(times)
-
-        averageTimeDisplayMinutes = floor(averageTimeSeconds / 60)
-        averageTimeDisplaySeconds = round(averageTimeSeconds % 60, 2)
-        print("Average Time: ", averageTimeDisplayMinutes, " minutes and ", averageTimeDisplaySeconds, "seconds")
-        #print("Walking Time: ", walkTime, " seconds")
-
-        print("Mode: ", round(mode(times), 2), " seconds")
-        if trials > 2:
-            print("Std Dev:", round(stdev(times), 2), " seconds")
-
-        fastestTimeDisplayMinutes = floor(fastestTime / 60)
-        fastestTimeDisplaySeconds = round(fastestTime % 60, 2)
-        print("Fastest Time: ", fastestTimeDisplayMinutes, " minutes and ", fastestTimeDisplaySeconds, "seconds")
-        print("Failed Bloats: ", failedBloatCount)
-
-        percentSub40 = sub40Count / len(times) * 100
-        print("Percent of Bloats 40 seconds and Under: ", round(percentSub40, 2))
-    else:
-        print("Failed to kill Bloat")
-        print("Walking Time: ", walkTime, " seconds")
+    times = sorted(times)
+    printStats(times)
+    plotTimes(times, "Bloat", 6)
 
 
-def killBloat():
+def killBloat(players, walkingTime, backupThreshold):
     bloat = Bloat(BLOAT_HP_5_MAN, BLOAT_DEFENSE, BLOAT_SLASH_DEFENSE, BLOAT_CRUSH_DEFENSE, BLOAT_STANDARD_RANGE_DEFENSE,
                   BLOAT_HEAVY_RANGE_DEFENSE)
 
-    # find how long bloat is walking for
-    walkTimeTicks = getWalkTIme()
+    if walkingTime > 0:
+        bloat.setWalkTime(walkingTime)
 
-    # get player 1's scythe and bgs damage
-    bloat.getScytheSalve()
-    bloat.getBgsSalve()
+    if backupThreshold < 0:
+        backupThreshold = BACKUP_THRESHOLD
 
-    # get player 2's scythe damage
-    bloat.getScytheSalve()
-    bloat.getScytheSalve()
-    bloat.getScythePneck()
+    # north south range mel 1 mel 2
+    neckingStartTick = [27, 9, 16, 2, 9]
+    scytheSalveHits = [2, 2, 2, 1, 0]
 
-    # get player 3's bgs dmg
-    backedUpOnce = bloat.getDefense() > BACKUP_THRESHOLD
-    if backedUpOnce:
-        bloat.getBgsSalve()
-    else:
-        bloat.getScytheSalve()
+    # start necking
+    roomTimeTicks = 1
+    while bloat.getHp() > 0:
+        roomTimeTicks += 1
 
-    backedUpTwice = bloat.getDefense() > BACKUP_THRESHOLD
-    if backedUpTwice:
-        bloat.getBgsSalve()
-    else:
-        bloat.getScytheSalve()
+        if roomTimeTicks == bloat.getWalkTIme():
+            bloat.stopWalking()
+            for player in players:
+                player.setMeleeGear(GearSets.scytheOathSalve)
 
-    # start the humid cycle
-    # this is how many scythe hits each humider gets before bloat stops walking
-    humidScytheHitsWalking = floor((walkTimeTicks - HUMID_CYCLE_START_TICK) / 5)
-    humidScytheCoolDown = (walkTimeTicks - HUMID_CYCLE_START_TICK) % 5
+        for x in range(len(players)):
+            player = players[x]
+            playerStartTick = neckingStartTick[x]
 
-    if SBS_FRZ:
-        players_on_lunars = TEAM_SIZE - 1
-    else:
-        players_on_lunars = TEAM_SIZE - 2
+            # special case where player 4 is running around the room between tick 8 and 15
+            if x == 3 and 9 <= roomTimeTicks <= 15:
+                player.decreaseWeaponCoolDown()
+                continue
 
-    for x in range(humidScytheHitsWalking):
-        bloat.setDefense(bloat.getDefense() + 5)  # bloat regens a defense level every tick he is walking
-        for y in range(players_on_lunars):
-            bloat.getScythePneck()
+            if player.weaponCoolDown == 0 and roomTimeTicks >= playerStartTick:
+                # bgs the boss
+                if "bgs" in player.specWeapons \
+                        and player.spec >= WeaponConstants.bgsSpecPercent \
+                        and bloat.getDefense() > backupThreshold:
+                    player.bgsSpecSalve(bloat)
 
+                elif "zcb" in player.specWeapons \
+                        and player.spec >= WeaponConstants.zcbSpecPercent \
+                        and not bloat.isWalking:
+                    player.zcbSpecSalve(bloat)
 
-    # if sbs frz, the non-humid necker starts the same time as the humid neckers
-    if SBS_FRZ:
-        nonHumidScytheHitsWalking = floor((walkTimeTicks - NON_HUMID_CYCLE_START_TICK) / 5)
-    else:
-        nonHumidScytheHitsWalking = floor((walkTimeTicks - HUMID_CYCLE_START_TICK) / 5)
+                # handle claw specs
+                elif "claw" in player.specWeapons \
+                        and player.spec >= WeaponConstants.clawSpecPercent \
+                        and not bloat.isWalking:
+                    player.clawSpecSalve(bloat)
 
-    bloat.getScytheSalve()
-    bloat.getScytheSalve()
-    for x in range(nonHumidScytheHitsWalking - 2):
-        bloat.getScythePneck()
-
-    # bloat will stop walking, figure out how many scythe hits each person has before bloat wakes up
-    bloat.stopWalking()
-    playerTicks = []
-    for x in range(TEAM_SIZE):
-        playerTicks.append(humidScytheCoolDown)
-
-    if backedUpTwice:
-        playerThreeSpec = 0
-    elif backedUpOnce:
-        playerThreeSpec = 50
-    else:
-        playerThreeSpec = 100
-
-    playerSpec = [50, 100, playerThreeSpec, 100, 100]
-
-    # 3 players have 2 claw specs, 1 player has 1 claw spec, and 1 player might have 0 or 1 or 2 claw specs
-    tickKilled = 0
-    playerFiveAttackCount = 0
-    for sleepTick in range(BLOAT_SLEEP_TICKS):
-        for player in range(TEAM_SIZE):
-            tick = playerTicks[player]
-            spec = playerSpec[player]
-
-            if player == 4 and spec == 100 and not SBS_FRZ:
-                # zcb spec
-                bloat.getZcbSalve()
-                tick = zcbCoolDown
-                spec -= zcbSpecPercent
-                playerFiveAttackCount += 1
-            else:
-                if player == 4 and playerFiveAttackCount == 4 and not SBS_FRZ:
-                    # Chally spec after 3 scythe hits
-                    bloat.getChallySalve()
-                    tick = challyCoolDown
-                    spec -= challySpecPercent
-                    playerFiveAttackCount += 1
+                # scythe the boss
+                elif "chally" in player.specWeapons \
+                        and player.spec >= WeaponConstants.challySpecPercent \
+                        and not bloat.isWalking \
+                        and bloat.hp <= CHALLY_THRESHOLD_PERCENT * BLOAT_HP_5_MAN:
+                    player.challySpecSalve(bloat)
                 else:
-                    dmg, tick, spec = getPlayerDamage(tick, spec, bloat)
-            playerTicks[player] = tick
-            playerSpec[player] = spec
+                    salveOrPneckCount = scytheSalveHits[x]
+                    if salveOrPneckCount > 0:
+                        player.meleeAttack(bloat)
+                        scytheSalveHits[x] = salveOrPneckCount - 1
+                        if salveOrPneckCount - 1 == 0:
+                            player.setMeleeGear(GearSets.scytheOathPneck)
+                    else:
+                        player.meleeAttack(bloat)
+            else:
+                player.decreaseWeaponCoolDown()
 
-            if bloat.isDead():
-                tickKilled = sleepTick
-                break
-
-        if bloat.isDead():
+        if roomTimeTicks > bloat.getWalkTIme() + BLOAT_SLEEP_TICKS:
+            # you have failed to kill bloat
             break
 
+    # if bloat is dead, return room time, otherwise return -1 to signal bloat was not killed
     if not bloat.isDead():
-        killTime = -1
+        return -1
     else:
-        killTime = walkTimeTicks * 0.6 + tickKilled * 0.6 + DEATH_ANIMATION_SECONDS
-    return killTime, walkTimeTicks * 0.6
+        return roomTimeTicks + DEATH_ANIMATION_TICKS
 
 
-def getPlayerDamage(tick, spec, bloat):
-    dmg = 0
-    if tick == 0:
-        if spec >= clawSpecPercent:
-            bloat.getClawSalve()
-            spec -= clawSpecPercent
-            tick = clawCoolDown
-        else:
-            bloat.getScytheSalve()
-            tick = scytheCoolDown
-    else:
-        tick -= 1
+def createPlayers():
+    players = []
 
-    return dmg, tick, spec
+    # NORTH MAGE
+    player1 = Player()
+    player1.setSpec(130, ["claw", "claw", "chally"])
+    player1.setMeleeGear(GearSets.scytheOathSalve)
+    player1.setRangeGear(GearSets.tbowMasori)
+    players.append(player1)
 
+    # MAGE DPS
+    player2 = Player()
+    player2.setSpec(125, ["Zcb", "claw"])
+    player2.setMeleeGear(GearSets.scytheOathSalve)
+    player2.setRangeGear(GearSets.tbowMasori)
+    players.append(player2)
 
-def getWalkTIme():
-    return randrange(MIN_DOWN_TICKS, MAX_DOWN_TICKS)
+    # RANGE
+    player3 = Player()
+    player3.setSpec(125, ["claw", "claw"])
+    player3.setMeleeGear(GearSets.scytheOathSalve)
+    player3.setRangeGear(GearSets.tbowVoid)
+    players.append(player3)
+
+    # MELEE 1
+    player4 = Player()
+    player4.setSpec(125, ["bgs", "claw"])
+    player4.setMeleeGear(GearSets.scytheOathSalve)
+    player4.setRangeGear(GearSets.tbowTorva)
+    players.append(player4)
+
+    # MELEE 2
+    player5 = Player()
+    player5.setSpec(125, ["bgs", "claw"])
+    player5.setMeleeGear(GearSets.scytheOathPneck)
+    player5.setRangeGear(GearSets.tbowTorva)
+    players.append(player5)
+
+    return players
 
 
 if __name__ == "__main__":

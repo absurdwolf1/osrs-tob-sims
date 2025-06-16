@@ -42,7 +42,7 @@ def getScytheDamage(scytheMax, attRoll, defense, slashDefense):
 def accuracyCheck(hitChance):
     # hit chance is a percent rounded to 2 decimals, multiply by 100 so we can roll a random int against it
     hitChance *= 100
-    return hitChance >= randint(0, 1000)
+    return hitChance >= randint(0, 10000)
 
 
 def getDamage(maxHit, accuracy):
